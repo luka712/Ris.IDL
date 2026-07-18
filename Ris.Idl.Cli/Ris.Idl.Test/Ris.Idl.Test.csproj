@@ -24,13 +24,4 @@
       <ProjectReference Include="..\Ris.Idl\Ris.Idl.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Update="TestClasses\ClassWithPropertiesOnly.cs">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Compile>
-      <Compile Update="TestInterfaces\InterfaceWithPropertiesOnly.cs">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Compile>
-    </ItemGroup>
-
 </Project>
