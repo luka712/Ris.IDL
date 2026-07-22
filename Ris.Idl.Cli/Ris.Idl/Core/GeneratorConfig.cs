@@ -35,6 +35,37 @@ public class GeneratorConfig
     public NamingCase ModuleCase { get; set; } = NamingCase.Pascal;
     
     /// <summary>
+    /// The case to use for enum.
+    /// </summary>
+    public NamingCase EnumCase { get; set; } = NamingCase.Pascal;
+    
+    /// <summary>
+    /// The case to use for enum keys.
+    /// </summary>
+    public NamingCase EnumKeyCase { get; set; } = NamingCase.Upper;
+    
+    /// <summary>
+    /// The case to use for event names.
+    /// </summary>
+    public NamingCase EventCase { get; set; } = NamingCase.Pascal;
+    
+    /// <summary>
+    /// Whether to add a newline between properties.
+    /// </summary>
+    public bool AddNewlineBetweenProperties { get; set; } = true;
+    
+    /// <summary>
+    /// Whether to add a newline between methods.
+    /// </summary>
+    public bool AddNewlineBetweenMethods { get; set; } = true;
+    
+    /// <summary>
+    /// Whether to add a newline between enum values.
+    /// </summary>
+    public bool AddNewLinesBetweenEnumValues { get; set; } = true;
+
+    
+    /// <summary>
     /// Whether to include XML documentation comments.
     /// </summary>
     public bool IncludeDocComments { get; set; } = true;

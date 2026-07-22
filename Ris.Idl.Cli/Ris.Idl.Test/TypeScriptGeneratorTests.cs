@@ -1,6 +1,7 @@
 using Ris.Idl;
 using Ris.Idl.Core;
 using Ris.Idl.TypeScript;
+using Ris.Idl.TypeScript.Configuration;
 
 namespace Ris.Idl.Test;
 

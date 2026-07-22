@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using Ris.Idl.Core;
 
 namespace Ris.Idl.TypeScript;
@@ -9,9 +10,18 @@ namespace Ris.Idl.TypeScript;
 /// </summary>
 public class TypeScriptClassGenerator : ITypeGenerator
 {
-    private readonly TypeScriptTypeMapper _typeMapper = new();
+    private readonly TypeScriptTypeMapper _typeMapper;
     private readonly TypeScriptDocCommentGenerator _docGenerator = new();
 
+    /// <summary>
+    /// The constructor.
+    /// </summary>
+    /// <param name="logger">The <see cref="ILogger"/>.</param>
+    public TypeScriptClassGenerator(ILogger logger)
+    {
+        _typeMapper = new TypeScriptTypeMapper(logger);
+    }
+    
     /// <inheritdoc />
     public bool CanGenerate(INamedTypeSymbol type)
     {
@@ -86,9 +96,12 @@ public class TypeScriptClassGenerator : ITypeGenerator
         var @namespace = type.ContainingNamespace?.ToDisplayString() ?? "";
         var modulePath = NamingHelper.NamespaceToModulePath(@namespace, tsConfig.ModuleCase);
         var fileName = NamingHelper.ToCamelCase(type.Name);
+        
+        // Build relative path with optional source folder prefix
+        var prefix = string.IsNullOrEmpty(tsConfig.SourceFolderPrefix) ? "" : $"{tsConfig.SourceFolderPrefix}/";
         var relativePath = string.IsNullOrEmpty(modulePath) 
-            ? $"src/{fileName}.ts" 
-            : $"src/{modulePath}/{fileName}.ts";
+            ? $"{prefix}{fileName}.ts" 
+            : $"{prefix}{modulePath}/{fileName}.ts";
 
         return new TypeScriptGeneratedFile(type.Name, sb.ToString(), relativePath, @namespace);
     }

@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 
 namespace Ris.Idl.TypeScript;
 
@@ -7,6 +8,17 @@ namespace Ris.Idl.TypeScript;
 /// </summary>
 public class TypeScriptTypeMapper
 {
+    private readonly ILogger _logger;
+
+    /// <summary>
+    /// The constructor.
+    /// </summary>
+    /// <param name="logger">The <see cref="ILogger"/>.</param>
+    public TypeScriptTypeMapper(ILogger logger)
+    {
+        _logger = logger;
+    }
+    
     /// <summary>
     /// Converts a C# type symbol to its TypeScript equivalent.
     /// </summary>
@@ -14,15 +26,14 @@ public class TypeScriptTypeMapper
     /// <returns>The TypeScript type string.</returns>
     public string MapType(ITypeSymbol type)
     {
+        _logger.LogDebug("Mapping type: {Type}", type.ToDisplayString());
+
+        var nullableStr = "";
+        
         // Handle nullable types
         if (type.NullableAnnotation == NullableAnnotation.Annotated)
         {
-            var underlyingType = type is INamedTypeSymbol { IsGenericType: true } namedType 
-                && namedType.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T
-                ? namedType.TypeArguments[0]
-                : type;
-            
-            return $"{MapType(underlyingType)} | null";
+            nullableStr = " | null";
         }
 
         // Handle arrays
@@ -38,7 +49,7 @@ public class TypeScriptTypeMapper
         }
 
         // Handle special types
-        return type.SpecialType switch
+        var typeName = type.SpecialType switch
         {
             SpecialType.System_Boolean => "boolean",
             SpecialType.System_Byte => "number",
@@ -58,6 +69,8 @@ public class TypeScriptTypeMapper
             SpecialType.System_Void => "void",
             _ => MapByTypeName(type)
         };
+        
+        return typeName + nullableStr;
     }
 
     /// <summary>

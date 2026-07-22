@@ -1,5 +1,6 @@
 ﻿using Ris.Idl;
 using Ris.Idl.TypeScript;
+using Ris.Idl.TypeScript.Configuration;
 
 // Example usage of Ris.Idl to generate TypeScript from C# projects
 

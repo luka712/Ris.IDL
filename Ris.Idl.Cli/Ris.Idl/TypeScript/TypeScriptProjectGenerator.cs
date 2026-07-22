@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using Ris.Idl.Core;
+using Ris.Idl.TypeScript.Configuration;
 
 namespace Ris.Idl.TypeScript;
 
@@ -16,7 +17,7 @@ public class TypeScriptProjectGenerator : IProjectGenerator
     };
 
     /// <inheritdoc />
-    public Task<GeneratedProject> GenerateAsync(ProjectConfiguration configuration, IReadOnlyList<IGeneratedFile> files)
+    public Task<GeneratedProject> GenerateProjectAsync(ProjectConfiguration configuration, IReadOnlyList<IGeneratedFile> files)
     {
         var tsConfig = configuration as TypeScriptProjectConfiguration ?? new TypeScriptProjectConfiguration
         {
@@ -45,14 +46,70 @@ public class TypeScriptProjectGenerator : IProjectGenerator
         // Generate index.ts barrel file
         if (tsConfig.GenerateIndexFile)
         {
-            project.ProjectFiles["src/index.ts"] = GenerateIndexFile(files, tsConfig);
+            var sourcePrefix = tsConfig.TypeScriptConfig.SourceFolderPrefix;
+            var indexPath = string.IsNullOrEmpty(sourcePrefix) ? "index.ts" : $"{sourcePrefix}/index.ts";
+            project.ProjectFiles[indexPath] = GenerateIndexFile(files, tsConfig);
         }
 
         return Task.FromResult(project);
     }
 
     /// <inheritdoc />
+    public Task<GeneratedIdlProject> GenerateIdlProjectAsync(IdlProjectConfiguration configuration, IReadOnlyList<IGeneratedFile> files)
+    {
+        var tsConfig = configuration as TypeScriptIdlProjectConfiguration ?? new TypeScriptIdlProjectConfiguration
+        {
+            Name = configuration.Name,
+            Version = configuration.Version,
+            Description = configuration.Description,
+            Author = configuration.Author,
+            OutputDirectory = configuration.OutputDirectory,
+            GeneratorConfig = configuration.GeneratorConfig
+        };
+
+        var project = new GeneratedIdlProject(files, tsConfig);
+        return Task.FromResult(project);
+    }
+
+    /// <inheritdoc />
     public async Task WriteProjectAsync(GeneratedProject project)
+    {
+        var outputDir = project.Configuration.OutputDirectory;
+        
+        // Ensure output directory exists
+        Directory.CreateDirectory(outputDir);
+
+        // Write all generated type files
+        foreach (var file in project.Files)
+        {
+            var filePath = Path.Combine(outputDir, file.RelativePath);
+            var directory = Path.GetDirectoryName(filePath);
+            
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            await File.WriteAllTextAsync(filePath, file.Content);
+        }
+
+        // Write project files (package.json, tsconfig.json, etc.)
+        foreach (var (relativePath, content) in project.ProjectFiles)
+        {
+            var filePath = Path.Combine(outputDir, relativePath);
+            var directory = Path.GetDirectoryName(filePath);
+            
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            await File.WriteAllTextAsync(filePath, content);
+        }
+    }
+    
+    /// <inheritdoc />
+    public async Task WriteProjectAsync(GeneratedIdlProject project)
     {
         var outputDir = project.Configuration.OutputDirectory;
         
@@ -197,6 +254,8 @@ public class TypeScriptProjectGenerator : IProjectGenerator
         sb.AppendLine("// Auto-generated barrel file - exports all types");
         sb.AppendLine();
 
+        var sourcePrefix = config.TypeScriptConfig.SourceFolderPrefix;
+        
         // Group files by namespace/module for organized exports
         var filesByNamespace = files
             .GroupBy(f => f.Namespace ?? "")
@@ -211,10 +270,17 @@ public class TypeScriptProjectGenerator : IProjectGenerator
 
             foreach (var file in group.OrderBy(f => f.Name))
             {
-                // Convert relative path to import path (remove src/ prefix and .ts extension)
-                var importPath = file.RelativePath
-                    .Replace("src/", "./")
-                    .Replace(".ts", "");
+                // Convert relative path to import path (remove source prefix and .ts extension)
+                var importPath = file.RelativePath;
+                
+                // Remove source folder prefix if present
+                if (!string.IsNullOrEmpty(sourcePrefix) && importPath.StartsWith($"{sourcePrefix}/"))
+                {
+                    importPath = importPath.Substring(sourcePrefix.Length + 1);
+                }
+                
+                // Add ./ prefix and remove .ts extension
+                importPath = "./" + importPath.Replace(".ts", "");
                 
                 sb.AppendLine($"export * from '{importPath}';");
             }

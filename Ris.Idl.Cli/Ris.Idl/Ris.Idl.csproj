@@ -12,6 +12,14 @@
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.6.0" />
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.6.0" />
       <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="5.6.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.10" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.10" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Cpp\" />
+      <Folder Include="CSharp\" />
+      <Folder Include="C\" />
     </ItemGroup>
 
 </Project>

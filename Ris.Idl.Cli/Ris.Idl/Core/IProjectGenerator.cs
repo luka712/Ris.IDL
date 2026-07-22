@@ -11,7 +11,15 @@ public interface IProjectGenerator
     /// <param name="configuration">The project configuration.</param>
     /// <param name="files">The generated files to include.</param>
     /// <returns>The generated project.</returns>
-    Task<GeneratedProject> GenerateAsync(ProjectConfiguration configuration, IReadOnlyList<IGeneratedFile> files);
+    Task<GeneratedProject> GenerateProjectAsync(ProjectConfiguration configuration, IReadOnlyList<IGeneratedFile> files);
+    
+    /// <summary>
+    /// Generates a complete project structure.
+    /// </summary>
+    /// <param name="configuration"></param>
+    /// <param name="files"></param>
+    /// <returns></returns>
+    Task<GeneratedIdlProject> GenerateIdlProjectAsync(IdlProjectConfiguration configuration, IReadOnlyList<IGeneratedFile> files);
     
     /// <summary>
     /// Writes the generated project to disk.

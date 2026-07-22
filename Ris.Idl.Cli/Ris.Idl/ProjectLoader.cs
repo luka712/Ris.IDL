@@ -1,8 +1,10 @@
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
+using Microsoft.Extensions.Logging;
 using Ris.Idl.Core;
 using Ris.Idl.TypeScript;
+using Ris.Idl.TypeScript.Configuration;
 
 namespace Ris.Idl;
 
@@ -21,9 +23,15 @@ public class ProjectLoader
     /// </summary>
     public ProjectLoader()
     {
+        var logger = LoggerFactory
+            .Create(builder => builder.SetMinimumLevel(LogLevel.Trace).AddConsole())
+            .CreateLogger<ProjectLoader>();
+        logger.LogInformation("Initializing project loader");
+        
         // Register default generators
-        _generators.Add(new TypeScriptInterfaceGenerator());
-        _generators.Add(new TypeScriptClassGenerator());
+        _generators.Add(new TypeScriptInterfaceGenerator(logger));
+        _generators.Add(new TypeScriptClassGenerator(logger));
+        _generators.Add(new TypeScriptEnumsGenerator(logger));
     }
 
     /// <summary>
@@ -103,7 +111,7 @@ public class ProjectLoader
     {
         var files = await LoadProjectAsync(projectPath, configuration.GeneratorConfig);
         var projectGenerator = new TypeScriptProjectGenerator();
-        return await projectGenerator.GenerateAsync(configuration, files);
+        return await projectGenerator.GenerateProjectAsync(configuration, files);
     }
 
     /// <summary>

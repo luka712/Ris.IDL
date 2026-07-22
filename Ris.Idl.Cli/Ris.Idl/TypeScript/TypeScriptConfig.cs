@@ -31,8 +31,10 @@ public class TypeScriptConfig : GeneratorConfig
     /// </summary>
     public string Indentation { get; set; } = "  ";
     
+
     /// <summary>
-    /// Whether to add a newline between properties.
+    /// The source folder prefix for generated files (e.g., "src").
+    /// Set to null or empty to generate files without a source folder prefix.
     /// </summary>
-    public bool AddNewlineBetweenProperties { get; set; } = true;
+    public string? SourceFolderPrefix { get; set; } = "src";
 }

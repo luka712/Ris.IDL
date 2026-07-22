@@ -1,6 +1,6 @@
 using Ris.Idl.Core;
 
-namespace Ris.Idl.TypeScript;
+namespace Ris.Idl.TypeScript.Configuration;
 
 /// <summary>
 /// TypeScript-specific project configuration.
