@@ -1,8 +1,10 @@
+using Windows.Devices.Midi;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.Extensions.Logging;
 using Ris.Idl.Core;
+using Ris.Idl.Symbols;
 using Ris.Idl.TypeScript;
 using Ris.Idl.TypeScript.Configuration;
 
@@ -35,12 +37,83 @@ public class ProjectLoader
     }
 
     /// <summary>
+    /// The symbol collector.
+    /// </summary>
+    public ISymbolCollector SymbolCollector { get; set; } = new SymbolCollector();
+
+    /// <summary>
     /// Adds a custom type generator.
     /// </summary>
     /// <param name="generator">The generator to add.</param>
     public void AddGenerator(ITypeGenerator generator)
     {
         _generators.Add(generator);
+    }
+
+    private async Task<IReadOnlyList<INamedTypeSymbol>> ReadProjectSymbolsAsync(string projectPath)
+    {
+        if (!File.Exists(projectPath))
+        {
+            throw new FileNotFoundException("Project file not found", projectPath);
+        }
+
+        EnsureMSBuildRegistered();
+        
+        using var workspace = MSBuildWorkspace.Create();
+        
+        workspace.RegisterWorkspaceFailedHandler(e =>
+        {
+            if (e.Diagnostic.Kind == WorkspaceDiagnosticKind.Failure)
+            {
+                Console.Error.WriteLine($"Workspace error: {e.Diagnostic.Message}");
+            }
+        }); 
+
+        var project = await workspace.OpenProjectAsync(projectPath);
+        var compilation = await project.GetCompilationAsync();
+
+        if (compilation is null)
+        {
+            throw new InvalidOperationException("Failed to compile project");
+        }
+        
+        return GetTypesFromNamespace(compilation.Assembly.GlobalNamespace).ToList();
+    }
+    
+    /// <summary>
+    /// Reads a project and returns <see cref="IdlProject"/>.
+    /// </summary>
+    /// <param name="projectPath">The path to the project.</param>
+    /// <returns>The <see cref="IdlProject"/>.</returns>
+    public async Task<IdlProject> ReadProjectAsync(string projectPath)
+    {
+        // 1. Collect all symbols from the project.
+        var roslynSymbols = await ReadProjectSymbolsAsync(projectPath);
+        
+        // 2. Now we convert that to idl symbols.
+        var idlSymbols = SymbolCollector.CollectSymbols(roslynSymbols);
+
+        List<IdlInterfaceSymbol> interfaces = new();
+        List<IdlClassSymbol> classes = new();
+        
+        foreach (var symbol in idlSymbols)
+        {
+            if (symbol is IdlInterfaceSymbol interfaceSymbol)
+            {
+                interfaces.Add(interfaceSymbol);
+            }
+            
+            if (symbol is IdlClassSymbol classSymbol)
+            {
+                classes.Add(classSymbol);
+            }
+        }
+        
+        return new IdlProject()
+        {
+            Classes = classes,
+            Interfaces = interfaces
+        };
     }
 
     /// <summary>
@@ -51,37 +124,14 @@ public class ProjectLoader
     /// <returns>A list of generated files.</returns>
     public async Task<IReadOnlyList<IGeneratedFile>> LoadProjectAsync(string projectPath, GeneratorConfig? config = null)
     {
-        if (!File.Exists(projectPath))
-        {
-            throw new FileNotFoundException("Project file not found", projectPath);
-        }
-
-        EnsureMSBuildRegistered();
-
-        config ??= new TypeScriptConfig();
-
-        using var workspace = MSBuildWorkspace.Create();
-        
-        workspace.RegisterWorkspaceFailedHandler(e =>
-        {
-            if (e.Diagnostic.Kind == WorkspaceDiagnosticKind.Failure)
-            {
-                Console.Error.WriteLine($"Workspace error: {e.Diagnostic.Message}");
-            }
-        });
-
-        var project = await workspace.OpenProjectAsync(projectPath);
-        var compilation = await project.GetCompilationAsync();
-
-        if (compilation is null)
-        {
-            throw new InvalidOperationException("Failed to compile project");
-        }
+        // 2. Now we need to collect all symbols from the compilation.
+        var roslynSymbols = await ReadProjectSymbolsAsync(projectPath);
+        var idlSymbols = SymbolCollector.CollectSymbols(roslynSymbols);
 
         var generatedFiles = new List<IGeneratedFile>();
 
         // Process all types in the compilation
-        foreach (var type in GetAllTypes(compilation))
+        foreach (var type in roslynSymbols)
         {
             var generator = _generators.FirstOrDefault(g => g.CanGenerate(type));
             if (generator != null)
@@ -99,6 +149,11 @@ public class ProjectLoader
         }
 
         return generatedFiles;
+    }
+
+    private void CollectTypes(Compilation compilation, List<INamedTypeSymbol> types)
+    {
+        
     }
 
     /// <summary>
@@ -140,14 +195,6 @@ public class ProjectLoader
             MSBuildLocator.RegisterDefaults();
             _msBuildRegistered = true;
         }
-    }
-
-    /// <summary>
-    /// Gets all types from a compilation.
-    /// </summary>
-    private static IEnumerable<INamedTypeSymbol> GetAllTypes(Compilation compilation)
-    {
-        return GetTypesFromNamespace(compilation.Assembly.GlobalNamespace);
     }
 
     /// <summary>

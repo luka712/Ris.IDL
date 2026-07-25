@@ -1,4 +1,5 @@
 using Ris.Idl.Core;
+using Ris.Idl.Symbols;
 
 namespace Ris.Idl.TypeScript;
 
@@ -21,7 +22,12 @@ public class TypeScriptGeneratedFile : IGeneratedFile
         RelativePath = relativePath;
         Namespace = @namespace;
     }
-    
+
+    /// <summary>
+    /// The symbol that was generated.
+    /// </summary>
+    public IIdlSymbol Symbol { get; }
+
     /// <inheritdoc />
     public string Content { get; }
     

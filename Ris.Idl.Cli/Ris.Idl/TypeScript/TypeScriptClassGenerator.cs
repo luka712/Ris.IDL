@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using Ris.Idl.Core;
+using Ris.Idl.Symbols;
 
 namespace Ris.Idl.TypeScript;
 

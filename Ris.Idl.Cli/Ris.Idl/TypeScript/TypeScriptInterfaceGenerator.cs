@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using Ris.Idl.Core;
+using Ris.Idl.Symbols;
 
 namespace Ris.Idl.TypeScript;
 
@@ -56,8 +57,6 @@ public class TypeScriptInterfaceGenerator : ITypeGenerator
         }
 
         // Interface declaration
-        
-        // Find all interfaces implemented by this interface
         var interfaces = type.Interfaces.Select(i => i.ToDisplayString());
         var interfacesStr = String.Join(',', interfaces);
         

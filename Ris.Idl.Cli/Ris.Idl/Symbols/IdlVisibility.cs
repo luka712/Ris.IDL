@@ -3,7 +3,7 @@ namespace Ris.Idl.Symbols;
 /// <summary>
 /// The visibility of a symbol.
 /// </summary>
-public enum Visibility
+public enum IdlVisibility
 {
     /// <summary>
     /// The symbol is public.

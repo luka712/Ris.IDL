@@ -1,3 +1,5 @@
+using Ris.Idl.Symbols;
+
 namespace Ris.Idl.Core;
 
 /// <summary>

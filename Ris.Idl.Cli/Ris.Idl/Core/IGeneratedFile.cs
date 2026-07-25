@@ -1,3 +1,5 @@
+using Ris.Idl.Symbols;
+
 namespace Ris.Idl.Core;
 
 /// <summary>
@@ -5,6 +7,11 @@ namespace Ris.Idl.Core;
 /// </summary>
 public interface IGeneratedFile
 {
+    /// <summary>
+    /// The symbol of this file.
+    /// </summary>
+    public IIdlSymbol Symbol { get; }
+    
     /// <summary>
     /// The generated source code content.
     /// </summary>
@@ -24,4 +31,5 @@ public interface IGeneratedFile
     /// The original namespace from the source.
     /// </summary>
     string? Namespace { get; }
+    
 }
