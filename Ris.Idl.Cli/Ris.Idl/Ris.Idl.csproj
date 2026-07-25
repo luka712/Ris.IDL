@@ -14,6 +14,8 @@
       <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="5.6.0" />
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.10" />
       <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.10" />
+      <PackageReference Include="Uno.CommunityToolkit.WinUI.UI.Controls.DataGrid" Version="7.1.206" />
+      <PackageReference Include="WinUI.TableView" Version="1.4.1" />
     </ItemGroup>
 
     <ItemGroup>

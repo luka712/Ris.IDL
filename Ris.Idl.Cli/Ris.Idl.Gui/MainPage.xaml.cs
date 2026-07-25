@@ -1,3 +1,5 @@
+using CommunityToolkit.Mvvm.ComponentModel.__Internals;
+using Ris.Idl.Gui.Pages;
 using Ris.Idl.Gui.ViewModel;
 
 namespace Ris.Idl.Gui;
@@ -7,12 +9,45 @@ namespace Ris.Idl.Gui;
 /// </summary>
 public sealed partial class MainPage : Page
 {
+    private MainViewModel? _viewModel;
+    
     public MainPage()
     {
         InitializeComponent();
-
+        
         var mainWindow = App.MainWindow!;
-        mainWindow.Closed += (_, _) => (DataContext as MainViewModel)?.SaveSettings();
-        mainWindow.Activated += (_, _) => (DataContext as MainViewModel)?.LoadSettings();
+        
+        _viewModel = DataContext as MainViewModel;
+        _viewModel!.Frame = ContentFrame;
+        
+        mainWindow.Closed += (_, _) => _viewModel?.SaveSettings();
+        mainWindow.Activated += (_, _) => _viewModel?.LoadSettings();
+        
+        NavigateToConvertPage();
+    }
+
+    private void NavigateToConvertPage()
+    {
+        ContentFrame.Navigate(typeof(ConvertPage), new ConvertPageViewModel
+        {
+            MainViewModel = DataContext as MainViewModel
+        });
+    }
+
+    private void NavView_OnSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+    {
+            if (args.SelectedItemContainer is not NavigationViewItem item)
+                return;
+
+            switch (item.Tag?.ToString())
+            {
+                case "CreateNew":
+                    NavigateToConvertPage();
+                    break;
+
+                case "Settings":
+                    ContentFrame.Navigate(typeof(SettingsPage));
+                    break;
+            }
     }
 }

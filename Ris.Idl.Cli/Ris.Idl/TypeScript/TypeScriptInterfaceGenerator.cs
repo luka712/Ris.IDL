@@ -56,8 +56,14 @@ public class TypeScriptInterfaceGenerator : ITypeGenerator
         }
 
         // Interface declaration
+        
+        // Find all interfaces implemented by this interface
+        var interfaces = type.Interfaces.Select(i => i.ToDisplayString());
+        var interfacesStr = String.Join(',', interfaces);
+        
         var exportKeyword = tsConfig.ExportTypes ? "export " : "";
-        sb.AppendLine($"{exportKeyword}interface {type.Name} {{");
+        var extendsKeyword = !string.IsNullOrEmpty(interfacesStr) ? $" extends {interfacesStr}" : "";
+        sb.AppendLine($"{exportKeyword}interface {type.Name}{extendsKeyword} {{");
 
         // Generate properties, events and methods
         GenerateProperties(type, sb, indent, tsConfig);
@@ -213,8 +219,12 @@ public class TypeScriptInterfaceGenerator : ITypeGenerator
             for(int j = 0; j < method.Parameters.Length; j++)
             {
                 var param = method.Parameters[j];
+                
+                // If it's null annotated or has a default value, add a ? to the type.
+                var nullableParam = param.Type.NullableAnnotation == NullableAnnotation.Annotated || param.HasExplicitDefaultValue ? "?" : "";
+                
                 parametersBuilder.Append(param.Name);
-                parametersBuilder.Append(": ");
+                parametersBuilder.Append($"{nullableParam}: ");
                 parametersBuilder.Append(_typeMapper.MapType(param.Type));
 
                 if (j < method.Parameters.Length - 1)

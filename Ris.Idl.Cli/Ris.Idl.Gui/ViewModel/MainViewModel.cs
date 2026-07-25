@@ -10,6 +10,8 @@ namespace Ris.Idl.Gui.ViewModel;
 public partial class MainViewModel : BaseViewModel
 {
     private readonly StringBuilder _logBuilder = new();
+    
+    
 
     [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(GenerateCommand))]
     private string? _projectPath;
@@ -45,6 +47,11 @@ public partial class MainViewModel : BaseViewModel
     public bool CanGenerate => !string.IsNullOrEmpty(ProjectPath) &&
                                !string.IsNullOrEmpty(OutputFolder) &&
                                !IsBusy;
+
+    /// <summary>
+    /// The main frame.
+    /// </summary>
+    public Frame Frame { get; set; } = null!;
 
     [RelayCommand(CanExecute = nameof(CanGenerate))]
     private async Task GenerateAsync()

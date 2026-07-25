@@ -1,3 +1,4 @@
+using System.Numerics;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 
@@ -9,6 +10,11 @@ namespace Ris.Idl.TypeScript;
 public class TypeScriptTypeMapper
 {
     private readonly ILogger _logger;
+
+    private readonly Dictionary<string, string> _customTypings = new()
+    {
+        [typeof(Vector2).ToString()] = "vec2",
+    };
 
     /// <summary>
     /// The constructor.
@@ -27,15 +33,7 @@ public class TypeScriptTypeMapper
     public string MapType(ITypeSymbol type)
     {
         _logger.LogDebug("Mapping type: {Type}", type.ToDisplayString());
-
-        var nullableStr = "";
         
-        // Handle nullable types
-        if (type.NullableAnnotation == NullableAnnotation.Annotated)
-        {
-            nullableStr = " | null";
-        }
-
         // Handle arrays
         if (type is IArrayTypeSymbol arrayType)
         {
@@ -70,7 +68,7 @@ public class TypeScriptTypeMapper
             _ => MapByTypeName(type)
         };
         
-        return typeName + nullableStr;
+        return typeName;
     }
 
     /// <summary>
@@ -80,6 +78,11 @@ public class TypeScriptTypeMapper
     {
         var fullName = type.ToDisplayString();
         var name = type.Name;
+
+        if (_customTypings.TryGetValue(fullName, out var mappedName))
+        {
+            return mappedName;
+        }
 
         return name switch
         {
@@ -149,6 +152,21 @@ public class TypeScriptTypeMapper
             
             // Keep generic type with mapped type arguments
             _ => $"{typeName}<{string.Join(", ", typeArgs.Select(MapType))}>"
+        };
+    }
+    
+    /// <summary>
+    /// Maps a value to its TypeScript equivalent.
+    /// </summary>
+    /// <param name="value">The value to map.</param>
+    /// <returns>The mapped value.</returns>
+    public string MapValue(object? value)
+    {
+        return value switch
+        {
+            bool b => b ? "true" : "false",
+            string => "string",
+            _ => value?.ToString() ?? "null"
         };
     }
 }

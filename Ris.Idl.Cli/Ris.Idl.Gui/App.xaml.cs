@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Extensions.Logging;
+using Ris.Idl.Gui.Repository;
 using Ris.Idl.Gui.ViewModel;
 using Uno.Resizetizer;
 
@@ -15,6 +16,11 @@ public partial class App : Application
     {
         this.InitializeComponent();
     }
+    
+    /// <summary>
+    /// The services provided by the application.
+    /// </summary>
+    public static IServiceProvider Services { get; private set; } = null!;
 
     public static Window? MainWindow { get; private set; }
     
@@ -25,6 +31,12 @@ public partial class App : Application
 #if DEBUG
         MainWindow.UseStudio();
 #endif
+        
+        var serviceCollection = new ServiceCollection();
+        RegisterServices.Register(serviceCollection);
+        Services = serviceCollection.BuildServiceProvider();
+        
+        Services.GetService<RisIdlDbContext>()!.Database.EnsureCreated();
 
 
         // Do not repeat app initialization when the Window already has content,
