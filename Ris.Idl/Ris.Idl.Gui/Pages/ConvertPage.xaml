@@ -1,0 +1,146 @@
+<Page
+    x:Class="Ris.Idl.Gui.Pages.ConvertPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:tableView="clr-namespace:WinUI.TableView;assembly=WinUI.TableView"
+    xmlns:viewModel="clr-namespace:Ris.Idl.Gui.ViewModel"
+    xmlns:controls="clr-namespace:CommunityToolkit.WinUI.UI.Controls;assembly=CommunityToolkit.WinUI.UI.Controls.DataGrid"
+    xmlns:toolkit="clr-namespace:Uno.UI.Toolkit;assembly=Uno.UI.Toolkit"
+    xmlns:views="clr-namespace:Ris.Idl.Gui.Views"
+    d:DataContext="{d:DesignInstance Type=viewModel:ConvertPageViewModel}"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid Padding="32" RowSpacing="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="200" />
+        </Grid.RowDefinitions>
+
+        <!-- Actions -->
+        <StackPanel Padding="20" Spacing="10" Orientation="Horizontal">
+            <Button Command="{Binding AddConvertItemCommand}"
+                    Content="Add New" />
+
+            <Button Command="{Binding EditConvertItemCommand}"
+                    Content="Edit"
+                    IsEnabled="{Binding HasSelectedConvertItem, Mode=OneWay}" />
+
+            <Button Command="{Binding AddConvertItemCommand}"
+                    Content="Remove"
+                    IsEnabled="{Binding HasSelectedConvertItem, Mode=OneWay}" />
+            
+            <AppBarSeparator  />
+            
+            <Button Command="{Binding BuildCommand}"
+                    Content="Build"
+                    IsEnabled="{Binding HasSelectedConvertItem, Mode=OneWay}" />
+
+            <ProgressRing IsIndeterminate="True" IsActive="{Binding IsBusy}"
+                         HorizontalAlignment="Right"
+                         VerticalAlignment="Center"
+                         Style="{StaticResource MaterialProgressRingStyle}" />
+
+        </StackPanel>
+
+        <toolkit:ElevatedView Elevation="1" Background="{ThemeResource SurfaceBrush}"
+                              Grid.Row="1"
+                              CornerRadius="16"
+                              Padding="10">
+            <controls:DataGrid
+                Margin="20"
+                AutoGenerateColumns="False"
+                ItemsSource="{Binding ConvertItems}"
+                SelectedItem="{Binding SelectedConvertItem, Mode=TwoWay}"
+                SelectionMode="Single"
+                CanUserSortColumns="True">
+
+                <controls:DataGrid.Columns>
+
+                    <controls:DataGridTemplateColumn Header="Source Project" Width="200">
+                        <controls:DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding SourceProject}"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="Clip"
+                                           TextWrapping="NoWrap"
+                                           ToolTipService.ToolTip="{Binding SourceProject}" />
+                            </DataTemplate>
+                        </controls:DataGridTemplateColumn.CellTemplate>
+                    </controls:DataGridTemplateColumn>
+
+                    <controls:DataGridTextColumn
+                        Header="Language"
+                        Binding="{Binding Language}" />
+
+                    <controls:DataGridTextColumn
+                        Header="Project Type"
+                        Binding="{Binding ProjectType}" />
+
+                    <controls:DataGridTemplateColumn Header="Target File Path" Width="200">
+                        <controls:DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding TargetFilePath}"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="Clip"
+                                           TextWrapping="NoWrap"
+                                           ToolTipService.ToolTip="{Binding TargetFilePath}" />
+                            </DataTemplate>
+                        </controls:DataGridTemplateColumn.CellTemplate>
+                    </controls:DataGridTemplateColumn>
+
+                    <controls:DataGridTextColumn
+                        Header="Created"
+                        Binding="{Binding Created}" />
+
+                    <controls:DataGridTextColumn
+                        Header="Updated"
+                        Binding="{Binding Updated}" />
+
+
+                </controls:DataGrid.Columns>
+            </controls:DataGrid>
+        </toolkit:ElevatedView>
+
+        <!-- Output Log View -->
+        <toolkit:ElevatedView Elevation="1" Background="{ThemeResource SurfaceBrush}"
+                              Grid.Row="2"
+                              CornerRadius="16">
+            <Border BorderBrush="Gray"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Margin="20"
+                    Padding="8">
+                <ScrollViewer>
+                    <TextBlock Text="{Binding LogText}"
+                               TextWrapping="Wrap"
+                               FontFamily="Consolas"
+                               FontSize="12"
+                               Foreground="White" />
+                </ScrollViewer>
+            </Border>
+        </toolkit:ElevatedView>
+
+        <!-- Title -->
+        <!-- <StackPanel Grid.Row="0" Margin="0,0,0,32"> -->
+        <!--     <TextBlock Text="Ris.Idl - C# to TypeScript Generator" -->
+        <!--                FontSize="28" -->
+        <!--                FontWeight="Bold" -->
+        <!--                HorizontalAlignment="Center" /> -->
+        <!--     <TextBlock Text="Generate TypeScript types from your C# project" -->
+        <!--                FontSize="14" -->
+        <!--                Foreground="Gray" -->
+        <!--                HorizontalAlignment="Center" -->
+        <!--                Margin="0,8,0,0" /> -->
+        <!-- </StackPanel> -->
+
+        <!-- Generator View -->
+        <!-- <views:GeneratorView Grid.Row="1"  -->
+        <!--                      DataContext="{Binding}" /> -->
+
+
+    </Grid>
+</Page>
