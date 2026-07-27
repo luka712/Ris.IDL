@@ -10,25 +10,30 @@ public interface IIdlNamedSymbol : IIdlSymbol
     /// <summary>
     /// The ID of the symbol.
     /// </summary>
-    public string Id { get; }
+    string Id { get; }
     
     /// <summary>
     /// The name of the symbol.
     /// </summary>
-    public string Name { get; }
+    string Name { get; }
+    
+    /// <summary>
+    /// The type of the symbol.
+    /// </summary>
+    string Type { get; }
     
     /// <summary>
     /// The documentation comment.
     /// </summary>
-    public IdlDocCommentSymbol? DocComment { get; set; }
+    IdlDocCommentSymbol? DocComment { get; set; }
     
     /// <summary>
     /// The namespace of the symbol.
     /// </summary>
-    public string Namespace { get; }
+    string Namespace { get; }
     
     /// <summary>
     /// The visibility of the interface.
     /// </summary>
-    public IdlVisibility Visibility { get; set; }
+    IdlVisibility Visibility { get; set; }
 }

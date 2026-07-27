@@ -1,8 +1,9 @@
 using Ris.Idl.Symbols.DocComment;
+using Ris.Idl.Utilities;
 
 namespace Ris.Idl.Symbols.Members;
 
-public record IdlEnumFieldSymbol
+public record IdlEnumFieldSymbol : IIdlSymbol
 {
     /// <summary>
     /// The name of the key case.
@@ -23,4 +24,26 @@ public record IdlEnumFieldSymbol
     /// The documentation comment for the key case.
     /// </summary>
     public IdlDocCommentSymbol? DocComment { get; set; }
+
+
+    public virtual bool Equals(IIdlSymbol? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+
+        if (other is IdlEnumFieldSymbol o)
+        {
+            return Name == o.Name
+                   && TypeName == o.TypeName
+                   && Value == o.Value 
+                   && ComparerUtility.Compare(DocComment, o.DocComment);
+        }
+        
+        return false;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Name, TypeName, Value, DocComment);
+    }
 }

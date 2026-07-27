@@ -137,7 +137,8 @@ public class ProjectLoader
     /// <param name="projectPath">Path to the .csproj file.</param>
     /// <param name="configuration">The project configuration.</param>
     /// <returns>The generated project.</returns>
-    public async Task<GeneratedProject> GenerateProjectAsync(string projectPath,
+    public async Task<GeneratedProject> GenerateProjectAsync(
+        string projectPath,
         TypeScriptProjectConfiguration configuration)
     {
         var idlProject = await LoadProjectAsync(projectPath, configuration.GeneratorConfig);

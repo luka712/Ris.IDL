@@ -20,7 +20,7 @@ public class IdlInterfaceSymbol : IdlNamedSymbol
     /// <summary>
     /// The interfaces that the interface inherits from.
     /// </summary>
-    public IReadOnlyList<IIdlNamedSymbol>? Inherits { get; set; }
+    public IReadOnlyList<IdlNamedSymbol>? Inherits { get; set; }
 
     /// <summary>
     /// The properties of the interface.

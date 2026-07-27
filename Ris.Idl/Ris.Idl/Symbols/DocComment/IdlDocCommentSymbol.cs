@@ -32,7 +32,25 @@ public class IdlDocCommentSymbol : IIdlSymbol
 
     protected bool Equals(IdlDocCommentSymbol other)
     {
-        return Name == other.Name && Summary == other.Summary && Equals(Remarks, other.Remarks) && Equals(Parameters, other.Parameters) && Returns == other.Returns;
+        bool equal = Name == other.Name 
+               && Summary == other.Summary
+               && Returns == other.Returns;
+        
+        if(!equal)
+        {
+            return false;
+        }
+      
+        equal = Remarks?.SequenceEqual(other.Remarks ?? []) == true;
+
+        if (!equal)
+        {
+            return false;
+        }
+        
+        equal = Parameters?.SequenceEqual(other.Parameters ?? []) == true;
+        
+        return equal;
     }
 
     /// <inheritdoc/>

@@ -17,9 +17,25 @@ public class TypeScriptProjectGenerator : AProjectGenerator
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    /// <inheritdoc />
-    public override Task<GeneratedProject> GenerateProjectAsync(ProjectConfiguration configuration, IdlProject idlProject)
+    /// <summary>
+    /// Finds the symbols meta.json file in the output directory.
+    /// </summary>
+    /// <param name="outputDir">The output directory to search for.</param>
+    /// <returns>The <see cref="IdlProjectSymbols"/> if found.</returns>
+    private async Task<IdlProjectSymbols?> FindSymbolsMetaJson(string outputDir)
     {
+        var jsonPath = Path.Combine(outputDir, "idl-symbols.meta.json");
+        if (!File.Exists(jsonPath))
+        {
+            return null;
+        }
+        return await IdlProjectSymbols.FromJson(jsonPath);  
+    }
+
+    /// <inheritdoc />
+    public override async Task<GeneratedProject> GenerateProjectAsync(ProjectConfiguration configuration, IdlProject idlProject)
+    {
+        var existingSymbols = (await FindSymbolsMetaJson(configuration.OutputDirectory))?.GetAllSymbols();
         var tsConfig = configuration as TypeScriptProjectConfiguration ?? new TypeScriptProjectConfiguration
         {
             Name = configuration.Name,
@@ -30,7 +46,17 @@ public class TypeScriptProjectGenerator : AProjectGenerator
             GeneratorConfig = configuration.GeneratorConfig
         };
         
-        var files = idlProject.GeneratedFiles;
+        var files = new List<GeneratedFile>();
+
+        foreach (var file in idlProject.GeneratedFiles)
+        {
+            if (existingSymbols != null && existingSymbols.Any(x => file.Symbol.Equals(x)))
+            {
+                continue;
+            }
+            
+            files.Add(file);
+        }
 
         var project = new GeneratedProject(files, tsConfig);
 
@@ -56,7 +82,7 @@ public class TypeScriptProjectGenerator : AProjectGenerator
             project.ProjectFiles[indexPath] = GenerateIndexFile(files, tsConfig);
         }
 
-        return Task.FromResult(project);
+        return project;
     }
 
     /// <inheritdoc />

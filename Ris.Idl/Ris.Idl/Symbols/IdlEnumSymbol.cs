@@ -1,13 +1,13 @@
 using Ris.Idl.Core;
-using Ris.Idl.Symbols.DocComment;
 using Ris.Idl.Symbols.Members;
+using Ris.Idl.Utilities;
 
 namespace Ris.Idl.Symbols;
 
 /// <summary>
 /// The symbol for an enum.
 /// </summary>
-public class IdlEnumSymbol : IIdlNamedSymbol
+public class IdlEnumSymbol : IdlNamedSymbol
 {
     /// <summary>
     /// The constructor.
@@ -20,26 +20,6 @@ public class IdlEnumSymbol : IIdlNamedSymbol
         Namespace = @namespace;
         Id = IdGenerator.CreateId(this);
     }
-
-    public string Id { get; }
-
-    /// <summary>
-    /// The name of the enum.
-    /// </summary>
-    public string Name { get; }
-    
-    /// <inheritdoc />
-    public string Namespace { get; }
-    
-    /// <summary>
-    /// The visibility of the enum.
-    /// </summary>
-    public IdlVisibility Visibility { get; set; } = IdlVisibility.PRIVATE;
-    
-    /// <summary>
-    /// The documentation comment for the interface.
-    /// </summary>
-    public IdlDocCommentSymbol? DocComment { get; set; }
     
     /// <summary>
     /// The fields of the enum.
@@ -48,16 +28,24 @@ public class IdlEnumSymbol : IIdlNamedSymbol
 
     protected bool Equals(IdlEnumSymbol other)
     {
-        return Id == other.Id && 
+        var equal = Id == other.Id && 
                Name == other.Name && 
                Namespace == other.Namespace && 
                Visibility == other.Visibility &&
-               Equals(DocComment, other.DocComment) &&
-               Equals(FieldSymbols, other.FieldSymbols);
+               ((DocComment is null && other.DocComment is null) || DocComment?.Equals(other.DocComment) == true);
+        
+        if(!equal)
+        {
+            return false;
+        }
+
+        equal = ComparerUtility.Compare(FieldSymbols, other.FieldSymbols);
+        
+        return equal;
     }
 
     /// <inheritdoc />
-    public bool Equals(IIdlSymbol? obj)
+    public override bool Equals(IIdlSymbol? obj)
     {
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;

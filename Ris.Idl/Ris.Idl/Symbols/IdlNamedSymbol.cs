@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Ris.Idl.Core;
 using Ris.Idl.Symbols.DocComment;
 
@@ -18,19 +19,37 @@ public class IdlNamedSymbol : IIdlNamedSymbol
         Name = name;
         Namespace = @namespace;
         Id = IdGenerator.CreateId(this);    
+        Type = GetType().Name;
+    }
+
+    /// <summary>
+    /// The constructor.
+    /// </summary>
+    [JsonConstructor]
+    internal IdlNamedSymbol()
+    {
+        Name = string.Empty;
+        Namespace = string.Empty;
+        Id = string.Empty;
+        Type = string.Empty;       
     }
     
     /// <inheritdoc />
-    public string Id { get; }
+    public string Id { get; set; }
     
     /// <inheritdoc />
-    public string Name { get; }
-    
+    public string Name { get; set; }
+
+    /// <summary>
+    /// The type of the symbol.
+    /// </summary>
+    public string Type { get; set; }
+
     /// <inheritdoc />
     public IdlDocCommentSymbol? DocComment { get; set; }
     
     /// <inheritdoc />
-    public string Namespace { get; }
+    public string Namespace { get; set; }
     
     /// <inheritdoc />
     public IdlVisibility Visibility { get; set; } = IdlVisibility.PRIVATE;
@@ -44,7 +63,7 @@ public class IdlNamedSymbol : IIdlNamedSymbol
     {
         return Id == other.Id 
                && Name == other.Name 
-               && Equals(DocComment, other.DocComment) 
+               && ((DocComment is null && other.DocComment is null) || DocComment?.Equals(other.DocComment) == true) 
                && Namespace == other.Namespace 
                && Visibility == other.Visibility;
     }

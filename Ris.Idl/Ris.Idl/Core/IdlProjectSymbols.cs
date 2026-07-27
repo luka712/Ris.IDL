@@ -11,22 +11,22 @@ public class IdlProjectSymbols
     /// <summary>
     /// The interfaces in the project.
     /// </summary>
-    public IReadOnlyList<IdlInterfaceSymbol>? Interfaces { get; set; }
-    
+    public IReadOnlyList<IdlInterfaceSymbol> Interfaces { get; set; } = [];
+
     /// <summary>
     /// The classes in the project.
     /// </summary>
-    public IReadOnlyList<IdlClassSymbol>? Classes { get; set; }
-    
+    public IReadOnlyList<IdlClassSymbol> Classes { get; set; } = [];
+
     /// <summary>
     /// The enums in the project.
     /// </summary>
-    public IReadOnlyList<IdlEnumSymbol>? Enums { get; set; }
+    public IReadOnlyList<IdlEnumSymbol> Enums { get; set; } = [];
 
     /// <summary>
     /// The structs in the project.
     /// </summary>
-    public List<IdlStructSymbol>? Structs { get; set; }
+    public List<IdlStructSymbol> Structs { get; set; } = [];
 
     /// <summary>
     /// Converts the project to JSON representation.
